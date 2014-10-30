@@ -14,12 +14,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 var utils = require("./utils");
 module.exports = {
     createCSS: function (document, styles, sheet) {
-        var doc = document;
-        if (typeof window.less.overrideCSStarget === 'function') {
-            if (window.less.overrideCSStarget()) {
-                doc = window.less.overrideCSStarget;
-            }
-        }
+        var doc = utils.getTargetedDoc(document);
 
         // Strip the query-string
         var href = sheet.href || '';
@@ -413,7 +408,7 @@ return FileManager;
 /*global window, document, location */
 
 var less;
-var addDataAttr = require("./utils").addDataAttr;
+var utils = require("./utils");
 
 /*
   TODO - options is now hidden - we should expose it on the less object, but not have it "as" the less object
@@ -429,7 +424,7 @@ var script = document.currentScript || (function() {
     var scripts = document.getElementsByTagName("script");
     return scripts[scripts.length - 1];
 })();
-options = addDataAttr(options, script);
+options = utils.addDataAttr(options, script);
 
 // shim Promise if required
 require('promise/polyfill.js');
@@ -505,13 +500,7 @@ function bind(func, thisArg) {
 }
 
 function loadStyles(modifyVars) {
-    var doc = document;
-    if (typeof window.less.overrideCSStarget === 'function') {
-        if (window.less.overrideCSStarget()) {
-            doc = window.less.overrideCSStarget;
-        }
-    }
-    var styles = doc.getElementsByTagName('style'),
+    var styles = utils.getTargetedDoc().getElementsByTagName('style'),
         style;
 
     for (var i = 0; i < styles.length; i++) {
@@ -520,7 +509,7 @@ function loadStyles(modifyVars) {
             var instanceOptions = clone(options);
             instanceOptions.modifyVars = modifyVars;
             var lessText = style.innerHTML || '';
-            instanceOptions.filename = doc.location.href.replace(/#.*$/, '');
+            instanceOptions.filename = document.location.href.replace(/#.*$/, '');
 
             if (modifyVars || instanceOptions.globalVars) {
                 instanceOptions.useFileCache = true;
@@ -546,7 +535,7 @@ function loadStyles(modifyVars) {
 
 function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
-    var instanceOptions = addDataAttr(clone(options), sheet);
+    var instanceOptions = utils.addDataAttr(clone(options), sheet);
     instanceOptions.mime = sheet.type;
 
     if (modifyVars) {
@@ -648,8 +637,9 @@ if (/!watch/.test(location.hash)) {
 // Get all <link> tags with the 'rel' attribute set to "stylesheet/less"
 //
 less.registerStylesheets = function() {
+
     return new Promise(function(resolve, reject) {
-        var links = document.getElementsByTagName('link');
+        var links = utils.getTargetedDoc().getElementsByTagName('link');
         less.sheets = [];
 
         for (var i = 0; i < links.length; i++) {
@@ -784,6 +774,14 @@ module.exports = {
                     options[opt] = JSON.parse(tag.dataset[opt]);
             }
         return options;
+    },
+    getTargetedDoc: function(passedDoc) {
+        var doc = passedDoc || document;
+        if (typeof window.less.overrideCSStarget === 'function') {
+            if (window.less.overrideCSStarget()) {
+                doc = window.less.overrideCSStarget;
+            }
+        }
     }
 };
 
