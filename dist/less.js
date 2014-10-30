@@ -779,7 +779,7 @@ module.exports = {
         var doc = passedDoc || document;
         if (typeof window.lessOverrideCSStarget === 'function') {
             if (window.lessOverrideCSStarget()) {
-                doc = window.lessOverrideCSStarget;
+                doc = window.lessOverrideCSStarget();
             }
         }
     }
