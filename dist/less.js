@@ -782,6 +782,7 @@ module.exports = {
                 doc = window.lessOverrideCSStarget();
             }
         }
+        return doc;
     }
 };
 
