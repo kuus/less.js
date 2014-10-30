@@ -777,9 +777,9 @@ module.exports = {
     },
     getTargetedDoc: function(passedDoc) {
         var doc = passedDoc || document;
-        if (typeof window.less.overrideCSStarget === 'function') {
-            if (window.less.overrideCSStarget()) {
-                doc = window.less.overrideCSStarget;
+        if (typeof window.lessOverrideCSStarget === 'function') {
+            if (window.lessOverrideCSStarget()) {
+                doc = window.lessOverrideCSStarget;
             }
         }
     }
