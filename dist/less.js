@@ -639,7 +639,7 @@ if (/!watch/.test(location.hash)) {
 less.registerStylesheets = function() {
 
     return new Promise(function(resolve, reject) {
-        var links = utils.getTargetedDoc().getElementsByTagName('link');
+        var links = window.document.getElementsByTagName('link');
         less.sheets = [];
 
         for (var i = 0; i < links.length; i++) {
