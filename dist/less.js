@@ -14,6 +14,13 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 var utils = require("./utils");
 module.exports = {
     createCSS: function (document, styles, sheet) {
+        var doc = document;
+        if (typeof window.less.overrideCSStarget === 'function') {
+            if (window.less.overrideCSStarget()) {
+                doc = window.less.overrideCSStarget;
+            }
+        }
+
         // Strip the query-string
         var href = sheet.href || '';
 
@@ -21,11 +28,11 @@ module.exports = {
         var id = 'less:' + (sheet.title || utils.extractId(href));
 
         // If this has already been inserted into the DOM, we may need to replace it
-        var oldCss = document.getElementById(id);
+        var oldCss = doc.getElementById(id);
         var keepOldCss = false;
 
         // Create a new stylesheet node for insertion or (if necessary) replacement
-        var css = document.createElement('style');
+        var css = doc.createElement('style');
         css.setAttribute('type', 'text/css');
         if (sheet.media) {
             css.setAttribute('media', sheet.media);
@@ -33,14 +40,14 @@ module.exports = {
         css.id = id;
 
         if (!css.styleSheet) {
-            css.appendChild(document.createTextNode(styles));
+            css.appendChild(doc.createTextNode(styles));
 
             // If new contents match contents of oldCss, don't replace oldCss
             keepOldCss = (oldCss !== null && oldCss.childNodes.length > 0 && css.childNodes.length > 0 &&
                 oldCss.firstChild.nodeValue === css.firstChild.nodeValue);
         }
 
-        var head = document.getElementsByTagName('head')[0];
+        var head = doc.getElementsByTagName('head')[0];
 
         // If there is no oldCss, just append; otherwise, only append if we need
         // to replace oldCss with an updated stylesheet
