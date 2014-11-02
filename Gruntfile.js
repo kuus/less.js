@@ -46,9 +46,13 @@ module.exports = function (grunt) {
 
         browserify: {
             browser: {
-                src: ['./lib/less-browser/index.js'],
+                src: ['./lib/less-browser/bootstrap.js'],
                 options: {
-                    alias: ["promise/polyfill.js:promise"]
+                    exclude: ["promise"],
+                    require: ["promise/polyfill.js"],
+                    browserifyOptions: {
+                        standalone: 'less'
+                    }
                 },
                 dest: 'tmp/less.js'
             }
@@ -282,6 +286,7 @@ module.exports = function (grunt) {
     // setup a web server to run the browser tests in a browser rather than phantom
     grunt.registerTask('browsertest-server', [
         'browsertest-lessjs',
+        'jasmine::build',
         'connect::keepalive'
     ]);
 
