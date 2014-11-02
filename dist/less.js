@@ -494,8 +494,7 @@ module.exports = less;
 less.options = options;
 var environment = less.environment,
     FileManager = require("./file-manager")(options, less.logger),
-    fileManager = new FileManager(),
-    documentTarget = getTargetedDoc(options, window.document);
+    fileManager = new FileManager();
 environment.addFileManager(fileManager);
 less.FileManager = FileManager;
 
@@ -537,7 +536,7 @@ function bind(func, thisArg) {
 }
 
 function loadStyles(modifyVars) {
-    var styles = documentTarget.getElementsByTagName('style'),
+    var styles = getTargetedDoc(options, window.document).getElementsByTagName('style'),
         style;
 
     for (var i = 0; i < styles.length; i++) {
@@ -597,7 +596,7 @@ function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
             var css = cache.getCSS(path, webInfo);
             if (!reload && css) {
-                browser.createCSS(documentTarget, css, sheet);
+                browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
                 webInfo.local = true;
                 callback(null, null, data, sheet, webInfo, path);
                 return;
@@ -638,7 +637,7 @@ function initRunningMode(){
                         errors.add(e, e.href || sheet.href);
                     } else if (css) {
                         css = postProcessCSS(css);
-                        browser.createCSS(documentTarget, css, sheet);
+                        browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
                         cache.setCSS(sheet.href, context.lastModified, css);
                     }
                 });
@@ -667,7 +666,7 @@ less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = fal
 less.registerStylesheets = function() {
 
     return new Promise(function(resolve, reject) {
-        var links = documentTarget.getElementsByTagName('link');
+        var links = getTargetedDoc(options, window.document).getElementsByTagName('link');
         less.sheets = [];
 
         for (var i = 0; i < links.length; i++) {
@@ -707,7 +706,7 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
             } else {
                 less.logger.info("rendered " + sheet.href + " successfully.");
                 css = postProcessCSS(css);
-                browser.createCSS(documentTarget, css, sheet);
+                browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
                 cache.setCSS(sheet.href, webInfo.lastModified, css);
             }
             less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
