@@ -28,6 +28,7 @@ lessTester.runTestSet({strictMath: true, dumpLineNumbers: 'all'}, "debug/", null
     function(name) { return name + '-all'; });
 lessTester.runTestSet({strictMath: true, relativeUrls: false, rootpath: "folder (1)/"}, "static-urls/");
 lessTester.runTestSet({strictMath: true, compress: true}, "compression/");
+lessTester.runTestSet({strictMath: true, strictUnits: true}, "strict-units/");
 lessTester.runTestSet({}, "legacy/");
 lessTester.runTestSet({strictMath: true, strictUnits: true, sourceMap: true, globalVars: true }, "sourcemaps/",
     lessTester.testSourcemap, null, null,
@@ -42,4 +43,6 @@ lessTester.runTestSet({globalVars: true, banner: "/**\n  * Test\n  */\n"}, "glob
 lessTester.runTestSet({modifyVars: true}, "modifyVars/",
     null, null, null, function(name) { return path.join('test/less/', name) + '.json'; });
 lessTester.runTestSet({urlArgs: '424242'}, "url-args/");
+lessTester.testSyncronous({syncImport: true}, "import");
+lessTester.testSyncronous({syncImport: true}, "css");
 lessTester.testNoOptions();
