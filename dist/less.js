@@ -11,16 +11,16 @@
  */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.less=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var addDataAttr = require("./utils").addDataAttr,
+var // addDataAttr = require("./utils").addDataAttr,
     browser = require("./browser");
 
-module.exports = function(window, options) {
+module.exports = function(options) {
 
     // use options from the current script tag data attribues
-    addDataAttr(options, browser.currentScript(window));
+    // addDataAttr(options, browser.currentScript(window));
 
     if (options.isFileProtocol === undefined) {
-        options.isFileProtocol = /^(file|chrome(-extension)?|resource|qrc|app):/.test(window.location.protocol);
+        options.isFileProtocol = false; // /^(file|chrome(-extension)?|resource|qrc|app):/.test(window.location.protocol);
     }
 
     // Load styles asynchronously (default: false)
@@ -33,20 +33,21 @@ module.exports = function(window, options) {
     options.fileAsync = options.fileAsync || false;
 
     // Interval between watch polls
-    options.poll = options.poll || (options.isFileProtocol ? 1000 : 1500);
+    options.poll = options.poll || 1000; // (options.isFileProtocol ? 1000 : 1500);
 
-    options.env = options.env || (window.location.hostname == '127.0.0.1' ||
-        window.location.hostname == '0.0.0.0'   ||
-        window.location.hostname == 'localhost' ||
-        (window.location.port &&
-            window.location.port.length > 0)      ||
-        options.isFileProtocol                   ? 'development'
-        : 'production');
+    options.env = options.env || // (window.location.hostname == '127.0.0.1' ||
+        // window.location.hostname == '0.0.0.0'   ||
+        // window.location.hostname == 'localhost' ||
+        // (window.location.port &&
+        //     window.location.port.length > 0)      ||
+        // options.isFileProtocol                   ? 'development'
+        // :
+        'production'; // );
 
-    var dumpLineNumbers = /!dumpLineNumbers:(comments|mediaquery|all)/.exec(window.location.hash);
-    if (dumpLineNumbers) {
-        options.dumpLineNumbers = dumpLineNumbers[1];
-    }
+    // var dumpLineNumbers = /!dumpLineNumbers:(comments|mediaquery|all)/.exec(window.location.hash);
+    // if (dumpLineNumbers) {
+        options.dumpLineNumbers = false; // dumpLineNumbers[1];
+    // }
 
     if (options.useFileCache === undefined) {
         options.useFileCache = true;
@@ -54,7 +55,7 @@ module.exports = function(window, options) {
 
 };
 
-},{"./browser":3,"./utils":9}],2:[function(require,module,exports){
+},{"./browser":3}],2:[function(require,module,exports){
 /**
  * Kicks off less and compiles any stylesheets
  * used in the browser distributed version of less
@@ -66,13 +67,13 @@ module.exports = function(window, options) {
 require('promise/polyfill.js');
 
 var options = window.less || {};
-require("./add-default-options")(window, options);
+require("./add-default-options")(options);
 
-var less = module.exports = require("./index")(window, options);
+var less = module.exports = require("./index")(options);
 
-if (/!watch/.test(window.location.hash)) {
-    less.watch();
-}
+// if (/!watch/.test(window.location.hash)) {
+//     less.watch();
+// }
 
 less.pageLoadFinished = less.registerStylesheets().then(
     function () {
@@ -136,24 +137,24 @@ module.exports = {
                 throw new Error("Couldn't reassign styleSheet.cssText.");
             }
         }
-    },
-    currentScript: function(window) {
-        var document = window.document;
-        return document.currentScript || (function() {
-            var scripts = document.getElementsByTagName("script");
-            return scripts[scripts.length - 1];
-        })();
     }
+    // currentScript: function(window) {
+    //     var document = window.document;
+    //     return document.currentScript || (function() {
+    //         var scripts = document.getElementsByTagName("script");
+    //         return scripts[scripts.length - 1];
+    //     })();
+    // }
 };
 
 },{"./utils":9}],4:[function(require,module,exports){
 // Cache system is a bit outdated and could do with work
 
-module.exports = function(window, options, logger) {
+module.exports = function(options, logger) {
     var cache = null;
     if (options.env !== 'development') {
         try {
-            cache = (typeof(window.localStorage) === 'undefined') ? null : window.localStorage;
+            cache = (typeof(localStorage) === 'undefined') ? null : localStorage;
         } catch (_) {}
     }
     return {
@@ -184,126 +185,13 @@ module.exports = function(window, options, logger) {
 };
 
 },{}],5:[function(require,module,exports){
-var utils = require("./utils"),
-    browser = require("./browser");
-
-module.exports = function(window, less, options) {
-
-    function errorHTML(e, rootHref) {
-        var id = 'less-error-message:' + utils.extractId(rootHref || "");
-        var template = '<li><label>{line}</label><pre class="{class}">{content}</pre></li>';
-        var elem = window.document.createElement('div'), timer, content, errors = [];
-        var filename = e.filename || rootHref;
-        var filenameNoPath = filename.match(/([^\/]+(\?.*)?)$/)[1];
-
-        elem.id        = id;
-        elem.className = "less-error-message";
-
-        content = '<h3>'  + (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
-            '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + "</a> ";
-
-        var errorline = function (e, i, classname) {
-            if (e.extract[i] !== undefined) {
-                errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
-                    .replace(/\{class\}/, classname)
-                    .replace(/\{content\}/, e.extract[i]));
-            }
-        };
-
-        if (e.extract) {
-            errorline(e, 0, '');
-            errorline(e, 1, 'line');
-            errorline(e, 2, '');
-            content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':</p>' +
-                '<ul>' + errors.join('') + '</ul>';
-        }
-        if (e.stack && (e.extract || options.logLevel >= 4)) {
-            content += '<br/>Stack Trace</br />' + e.stack.split('\n').slice(1).join('<br/>');
-        }
-        elem.innerHTML = content;
-
-        // CSS for error messages
-        browser.createCSS(window.document, [
-            '.less-error-message ul, .less-error-message li {',
-            'list-style-type: none;',
-            'margin-right: 15px;',
-            'padding: 4px 0;',
-            'margin: 0;',
-            '}',
-            '.less-error-message label {',
-            'font-size: 12px;',
-            'margin-right: 15px;',
-            'padding: 4px 0;',
-            'color: #cc7777;',
-            '}',
-            '.less-error-message pre {',
-            'color: #dd6666;',
-            'padding: 4px 0;',
-            'margin: 0;',
-            'display: inline-block;',
-            '}',
-            '.less-error-message pre.line {',
-            'color: #ff0000;',
-            '}',
-            '.less-error-message h3 {',
-            'font-size: 20px;',
-            'font-weight: bold;',
-            'padding: 15px 0 5px 0;',
-            'margin: 0;',
-            '}',
-            '.less-error-message a {',
-            'color: #10a',
-            '}',
-            '.less-error-message .error {',
-            'color: red;',
-            'font-weight: bold;',
-            'padding-bottom: 2px;',
-            'border-bottom: 1px dashed red;',
-            '}'
-        ].join('\n'), { title: 'error-message' });
-
-        elem.style.cssText = [
-            "font-family: Arial, sans-serif",
-            "border: 1px solid #e00",
-            "background-color: #eee",
-            "border-radius: 5px",
-            "-webkit-border-radius: 5px",
-            "-moz-border-radius: 5px",
-            "color: #e00",
-            "padding: 15px",
-            "margin-bottom: 15px"
-        ].join(';');
-
-        if (options.env === 'development') {
-            timer = setInterval(function () {
-                var document = window.document,
-                    body = document.body;
-                if (body) {
-                    if (document.getElementById(id)) {
-                        body.replaceChild(elem, document.getElementById(id));
-                    } else {
-                        body.insertBefore(elem, body.firstChild);
-                    }
-                    clearInterval(timer);
-                }
-            }, 10);
-        }
-    }
+module.exports = function(less, options) {
 
     function error(e, rootHref) {
-        if (!options.errorReporting || options.errorReporting === "html") {
-            errorHTML(e, rootHref);
-        } else if (options.errorReporting === "console") {
+        if (!options.errorReporting || options.errorReporting === "console") {
             errorConsole(e, rootHref);
         } else if (typeof options.errorReporting === 'function') {
             options.errorReporting("add", e, rootHref);
-        }
-    }
-
-    function removeErrorHTML(path) {
-        var node = window.document.getElementById('less-error-message:' + utils.extractId(path));
-        if (node) {
-            node.parentNode.removeChild(node);
         }
     }
 
@@ -312,9 +200,7 @@ module.exports = function(window, less, options) {
     }
 
     function removeError(path) {
-        if (!options.errorReporting || options.errorReporting === "html") {
-            removeErrorHTML(path);
-        } else if (options.errorReporting === "console") {
+        if (!options.errorReporting || options.errorReporting === "console") {
             removeErrorConsole(path);
         } else if (typeof options.errorReporting === 'function') {
             options.errorReporting("remove", path);
@@ -355,7 +241,7 @@ module.exports = function(window, less, options) {
     };
 };
 
-},{"./browser":3,"./utils":9}],6:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /*global window, XMLHttpRequest */
 
 module.exports = function(options, logger) {
@@ -367,7 +253,7 @@ var fileCache = {};
 //TODOS - move log somewhere. pathDiff and doing something similar in node. use pathDiff in the other browser file for the initial load
 
 function getXMLHttpRequest() {
-    if (window.XMLHttpRequest && (window.location.protocol !== "file:" || !("ActiveXObject" in window))) {
+    if (XMLHttpRequest) {
         return new XMLHttpRequest();
     } else {
         try {
@@ -449,7 +335,7 @@ FileManager.prototype.loadFile = function loadFile(filename, currentDirectory, o
 
     // sheet may be set to the stylesheet for the initial load or a collection of properties including
     // some context variables for imports
-    var hrefParts = this.extractUrlParts(filename, window.location.href);
+    var hrefParts = this.extractUrlParts(filename, options.locationHref);
     var href      = hrefParts.url;
 
     if (options.useFileCache && fileCache[href]) {
@@ -485,8 +371,7 @@ var addDataAttr = require("./utils").addDataAttr,
     getTargetedDoc = require("./utils").getTargetedDoc,
     browser = require("./browser");
 
-module.exports = function(window, options) {
-var document = window.document;
+module.exports = function(options) {
 var less = require('../less')();
 module.exports = less;
 less.options = options;
@@ -497,8 +382,8 @@ environment.addFileManager(fileManager);
 less.FileManager = FileManager;
 
 require("./log-listener")(less, options);
-var errors = require("./error-reporting")(window, less, options);
-var cache = less.cache = options.cache || require("./cache")(window, options, less.logger);
+var errors = require("./error-reporting")(less, options);
+var cache = less.cache = options.cache || require("./cache")(options, less.logger);
 
 //Setup user functions
 if (options.functions) {
@@ -533,42 +418,42 @@ function bind(func, thisArg) {
     };
 }
 
-function loadStyles(modifyVars) {
-    var styles = getTargetedDoc(options, window.document).getElementsByTagName('style'),
-        style;
+// function loadStyles(modifyVars) {
+//     var styles = getTargetedDoc(options, window.document).getElementsByTagName('style'),
+//         style;
 
-    for (var i = 0; i < styles.length; i++) {
-        style = styles[i];
-        if (style.type.match(typePattern)) {
-            var instanceOptions = clone(options);
-            instanceOptions.modifyVars = modifyVars;
-            var lessText = style.innerHTML || '';
-            instanceOptions.filename = document.location.href.replace(/#.*$/, '');
+//     for (var i = 0; i < styles.length; i++) {
+//         style = styles[i];
+//         if (style.type.match(typePattern)) {
+//             var instanceOptions = clone(options);
+//             instanceOptions.modifyVars = modifyVars;
+//             var lessText = style.innerHTML || '';
+//             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
 
-            /*jshint loopfunc:true */
-            // use closure to store current style
-            less.render(lessText, instanceOptions,
-                    bind(function(style, e, result) {
-                        if (e) {
-                            errors.add(e, "inline");
-                        } else {
-                            style.type = 'text/css';
-                            if (style.styleSheet) {
-                                style.styleSheet.cssText = result.css;
-                            } else {
-                                style.innerHTML = result.css;
-                            }
-                        }
-                    }, null, style));
-        }
-    }
-}
+//             /*jshint loopfunc:true */
+//             // use closure to store current style
+//             less.render(lessText, instanceOptions,
+//                     bind(function(style, e, result) {
+//                         if (e) {
+//                             errors.add(e, "inline");
+//                         } else {
+//                             style.type = 'text/css';
+//                             if (style.styleSheet) {
+//                                 style.styleSheet.cssText = result.css;
+//                             } else {
+//                                 style.innerHTML = result.css;
+//                             }
+//                         }
+//                     }, null, style));
+//         }
+//     }
+// }
 
 function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
     var instanceOptions = clone(options);
-    addDataAttr(instanceOptions, sheet);
-    instanceOptions.mime = sheet.type;
+    // addDataAttr(instanceOptions, sheet);
+    // instanceOptions.mime = sheet.type;
 
     if (modifyVars) {
         instanceOptions.modifyVars = modifyVars;
@@ -594,7 +479,7 @@ function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
             var css = cache.getCSS(path, webInfo);
             if (!reload && css) {
-                browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
+                // browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
                 webInfo.local = true;
                 callback(null, null, data, sheet, webInfo, path);
                 return;
@@ -605,7 +490,7 @@ function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
         errors.remove(path);
 
         instanceOptions.rootFileInfo = newFileInfo;
-        less.render(data, instanceOptions, function(e, result) {
+        less.render(sheet, instanceOptions, function(e, result) {
             if (e) {
                 e.href = path;
                 callback(e);
@@ -630,38 +515,38 @@ function loadStyleSheets(callback, reload, modifyVars) {
     }
 }
 
-function initRunningMode(){
-    if (less.env === 'development') {
-        less.watchTimer = setInterval(function () {
-            if (less.watchMode) {
-                fileManager.clearFileCache();
-                loadStyleSheets(function (e, css, _, sheet, context) {
-                    if (e) {
-                        errors.add(e, e.href || sheet.href);
-                    } else if (css) {
-                        css = postProcessCSS(css);
-                        browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
-                        cache.setCSS(sheet.href, context.lastModified, css);
-                    }
-                });
-            }
-        }, options.poll);
-    }
-}
+// function initRunningMode(){
+//     if (less.env === 'development') {
+//         less.watchTimer = setInterval(function () {
+//             if (less.watchMode) {
+//                 fileManager.clearFileCache();
+//                 loadStyleSheets(function (e, css, _, sheet, context) {
+//                     if (e) {
+//                         errors.add(e, e.href || sheet.href);
+//                     } else if (css) {
+//                         css = postProcessCSS(css);
+//                         // browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
+//                         cache.setCSS(sheet.href, context.lastModified, css);
+//                     }
+//                 });
+//             }
+//         }, options.poll);
+//     }
+// }
 
 //
 // Watch mode
 //
-less.watch   = function () {
-    if (!less.watchMode ){
-        less.env = 'development';
-         initRunningMode();
-    }
-    this.watchMode = true;
-    return true;
-};
+// less.watch   = function () {
+//     if (!less.watchMode ){
+//         less.env = 'development';
+//          initRunningMode();
+//     }
+//     this.watchMode = true;
+//     return true;
+// };
 
-less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = false; return false; };
+// less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = false; return false; };
 
 //
 // Get all <link> tags with the 'rel' attribute set to "stylesheet/less"
@@ -669,15 +554,17 @@ less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = fal
 less.registerStylesheets = function() {
 
     return new Promise(function(resolve, reject) {
-        var links = getTargetedDoc(options, window.document).getElementsByTagName('link');
-        less.sheets = [];
-
-        for (var i = 0; i < links.length; i++) {
-            if (links[i].rel === 'stylesheet/less' || (links[i].rel.match(/stylesheet/) &&
-                (links[i].type.match(typePattern)))) {
-                less.sheets.push(links[i]);
-            }
+        // var links = getTargetedDoc(options, window.document).getElementsByTagName('link');
+        if (options.getStylesheets && typeof options.getStylesheets === 'function') {
+            less.sheets = options.getStylesheets();
         }
+
+        // for (var i = 0; i < links.length; i++) {
+        //     if (links[i].rel === 'stylesheet/less' || (links[i].rel.match(/stylesheet/) &&
+        //         (links[i].type.match(typePattern)))) {
+        //         less.sheets.push(links[i]);
+        //     }
+        // }
 
         resolve();
     });
@@ -710,7 +597,7 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
             } else {
                 less.logger.info("rendered " + sheet.href + " successfully.");
                 css = postProcessCSS(css);
-                browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
+                // browser.createCSS(getTargetedDoc(options, window.document), css, sheet);
                 cache.setCSS(sheet.href, webInfo.lastModified, css);
             }
             less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
@@ -727,11 +614,11 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
             endTime = new Date();
         }, reload, modifyVars);
 
-        loadStyles(modifyVars);
+        // loadStyles(modifyVars);
     });
 };
 
-less.refreshStyles = loadStyles;
+// less.refreshStyles = loadStyles;
     return less;
 };
 
@@ -789,30 +676,6 @@ module.exports = {
             .replace(/\.[a-zA-Z]+$/,        '' )  // Remove simple extension
             .replace(/[^\.\w-]+/g,          '-')  // Replace illegal characters
             .replace(/\./g,                 ':'); // Replace dots with colons(for valid id)
-    },
-    addDataAttr: function(options, tag) {
-        for (var opt in tag.dataset) {
-            if (tag.dataset.hasOwnProperty(opt)) {
-                if (opt === "env" || opt === "dumpLineNumbers" || opt === "rootpath" || opt === "errorReporting") {
-                    options[opt] = tag.dataset[opt];
-                } else {
-                    try {
-                        options[opt] = JSON.parse(tag.dataset[opt]);
-                    }
-                    catch(_) {}
-                }
-            }
-        }
-    },
-    getTargetedDoc: function(options, document) {
-        var doc = document;
-        var override = options.overrideCSStarget;
-        if (typeof override === 'function') {
-            if (override()) {
-                doc = override();
-            }
-        }
-        return doc;
     }
 };
 
@@ -9302,13 +9165,13 @@ Promise.all = function (arr) {
 }
 
 Promise.reject = function (value) {
-  return new Promise(function (resolve, reject) { 
+  return new Promise(function (resolve, reject) {
     reject(value);
   });
 }
 
 Promise.race = function (values) {
-  return new Promise(function (resolve, reject) { 
+  return new Promise(function (resolve, reject) {
     values.forEach(function(value){
       Promise.resolve(value).then(resolve, reject);
     })
