@@ -71,7 +71,7 @@ var less = module.exports = require("./index")(options);
 //     );
 // }
 
-},{"./add-default-options":1,"./index":6,"promise/polyfill.js":undefined}],3:[function(require,module,exports){
+},{"./add-default-options":1,"./index":6,"promise/polyfill.js":"promise/polyfill.js"}],3:[function(require,module,exports){
 /* global localStorage */
 
 // Cache system is a bit outdated and could do with work
@@ -293,8 +293,11 @@ return FileManager;
 // index.js
 // Should expose the additional browser functions on to the less object
 //
+// var addDataAttr = require("./utils").addDataAttr,
+//     browser = require("./browser");
 
 module.exports = function(options) {
+// var document = window.document;
 var less = require('../less')();
 module.exports = less;
 less.options = options;
@@ -305,14 +308,243 @@ environment.addFileManager(fileManager);
 less.FileManager = FileManager;
 
 require("./log-listener")(less, options);
-var errors = require("./error-reporting")(less, options);
-var cache = less.cache = options.cache || require("./cache")(options, less.logger);
+var errors = require("./error-reporting")(/*window,*/ less, options);
+var cache = less.cache = options.cache || require("./cache")(/*window,*/ options, less.logger);
 
 //Setup user functions
 if (options.functions) {
     less.functions.functionRegistry.addMultiple(options.functions);
 }
-}
+
+// var typePattern = /^text\/(x-)?less$/;
+
+// function postProcessCSS(styles) {
+//     if (options.postProcessor && typeof options.postProcessor === 'function') {
+//         styles = options.postProcessor.call(styles, styles) || styles;
+//     }
+//     return styles;
+// }
+
+// function clone(obj) {
+//     var cloned = {};
+//     for(var prop in obj) {
+//         if (obj.hasOwnProperty(prop)) {
+//             cloned[prop] = obj[prop];
+//         }
+//     }
+//     return cloned;
+// }
+
+// // only really needed for phantom
+// function bind(func, thisArg) {
+//     var curryArgs = Array.prototype.slice.call(arguments, 2);
+//     return function() {
+//         var args = curryArgs.concat(Array.prototype.slice.call(arguments, 0));
+//         return func.apply(thisArg, args);
+//     };
+// }
+
+// function loadStyles(modifyVars) {
+//     var styles = document.getElementsByTagName('style'),
+//         style;
+
+//     for (var i = 0; i < styles.length; i++) {
+//         style = styles[i];
+//         if (style.type.match(typePattern)) {
+//             var instanceOptions = clone(options);
+//             instanceOptions.modifyVars = modifyVars;
+//             var lessText = style.innerHTML || '';
+//             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
+
+//             /*jshint loopfunc:true */
+//             // use closure to store current style
+//             less.render(lessText, instanceOptions,
+//                     bind(function(style, e, result) {
+//                         if (e) {
+//                             errors.add(e, "inline");
+//                         } else {
+//                             style.type = 'text/css';
+//                             if (style.styleSheet) {
+//                                 style.styleSheet.cssText = result.css;
+//                             } else {
+//                                 style.innerHTML = result.css;
+//                             }
+//                         }
+//                     }, null, style));
+//         }
+//     }
+// }
+
+// function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
+
+//     var instanceOptions = clone(options);
+//     addDataAttr(instanceOptions, sheet);
+//     instanceOptions.mime = sheet.type;
+
+//     if (modifyVars) {
+//         instanceOptions.modifyVars = modifyVars;
+//     }
+
+//     function loadInitialFileCallback(loadedFile) {
+
+//         var data = loadedFile.contents,
+//             path = loadedFile.filename,
+//             webInfo = loadedFile.webInfo;
+
+//         var newFileInfo = {
+//             currentDirectory: fileManager.getPath(path),
+//             filename: path,
+//             rootFilename: path,
+//             relativeUrls: instanceOptions.relativeUrls};
+
+//         newFileInfo.entryPath = newFileInfo.currentDirectory;
+//         newFileInfo.rootpath = instanceOptions.rootpath || newFileInfo.currentDirectory;
+
+//         if (webInfo) {
+//             webInfo.remaining = remaining;
+
+//             if (!instanceOptions.modifyVars) {
+//                 var css = cache.getCSS(path, webInfo);
+//                 if (!reload && css) {
+//                     webInfo.local = true;
+//                     callback(null, css, data, sheet, webInfo, path);
+//                     return;
+//                 }
+//             }
+//         }
+
+//         //TODO add tests around how this behaves when reloading
+//         errors.remove(path);
+
+//         instanceOptions.rootFileInfo = newFileInfo;
+//         less.render(data, instanceOptions, function(e, result) {
+//             if (e) {
+//                 e.href = path;
+//                 callback(e);
+//             } else {
+//                 result.css = postProcessCSS(result.css);
+//                 if (!instanceOptions.modifyVars) {
+//                     cache.setCSS(sheet.href, webInfo.lastModified, result.css);
+//                 }
+//                 callback(null, result.css, data, sheet, webInfo, path);
+//             }
+//         });
+//     }
+
+//     fileManager.loadFile(sheet.href, null, instanceOptions, environment, function(e, loadedFile) {
+//         if (e) {
+//             callback(e);
+//             return;
+//         }
+//         loadInitialFileCallback(loadedFile);
+//     });
+// }
+
+// function loadStyleSheets(callback, reload, modifyVars) {
+//     for (var i = 0; i < less.sheets.length; i++) {
+//         loadStyleSheet(less.sheets[i], callback, reload, less.sheets.length - (i + 1), modifyVars);
+//     }
+// }
+
+// function initRunningMode(){
+//     if (less.env === 'development') {
+//         less.watchTimer = setInterval(function () {
+//             if (less.watchMode) {
+//                 fileManager.clearFileCache();
+//                 loadStyleSheets(function (e, css, _, sheet, webInfo) {
+//                     if (e) {
+//                         errors.add(e, e.href || sheet.href);
+//                     } else if (css) {
+//                         browser.createCSS(window.document, css, sheet);
+//                     }
+//                 });
+//             }
+//         }, options.poll);
+//     }
+// }
+
+// //
+// // Watch mode
+// //
+// less.watch   = function () {
+//     if (!less.watchMode ){
+//         less.env = 'development';
+//          initRunningMode();
+//     }
+//     this.watchMode = true;
+//     return true;
+// };
+
+// less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = false; return false; };
+
+// //
+// // Get all <link> tags with the 'rel' attribute set to "stylesheet/less"
+// //
+// less.registerStylesheets = function() {
+//     return new Promise(function(resolve, reject) {
+//         var links = document.getElementsByTagName('link');
+//         less.sheets = [];
+
+//         for (var i = 0; i < links.length; i++) {
+//             if (links[i].rel === 'stylesheet/less' || (links[i].rel.match(/stylesheet/) &&
+//                 (links[i].type.match(typePattern)))) {
+//                 less.sheets.push(links[i]);
+//             }
+//         }
+
+//         resolve();
+//     });
+// };
+
+// //
+// // With this function, it's possible to alter variables and re-render
+// // CSS without reloading less-files
+// //
+// less.modifyVars = function(record) {
+//     return less.refresh(true, record, false);
+// };
+
+// less.refresh = function (reload, modifyVars, clearFileCache) {
+//     if ((reload || clearFileCache) && clearFileCache !== false) {
+//         fileManager.clearFileCache();
+//     }
+//     return new Promise(function (resolve, reject) {
+//         var startTime, endTime, totalMilliseconds;
+//         startTime = endTime = new Date();
+
+//         loadStyleSheets(function (e, css, _, sheet, webInfo) {
+//             if (e) {
+//                 errors.add(e, e.href || sheet.href);
+//                 reject(e);
+//                 return;
+//             }
+//             if (webInfo.local) {
+//                 less.logger.info("loading " + sheet.href + " from cache.");
+//             } else {
+//                 less.logger.info("rendered " + sheet.href + " successfully.");
+//             }
+//             browser.createCSS(window.document, css, sheet);
+//             less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
+//             if (webInfo.remaining === 0) {
+//                 totalMilliseconds = new Date() - startTime;
+//                 less.logger.info("less has finished. css generated in " + totalMilliseconds + 'ms');
+//                 resolve({
+//                     startTime: startTime,
+//                     endTime: endTime,
+//                     totalMilliseconds: totalMilliseconds,
+//                     sheets: less.sheets.length
+//                 });
+//             }
+//             endTime = new Date();
+//         }, reload, modifyVars);
+
+//         loadStyles(modifyVars);
+//     });
+// };
+
+// less.refreshStyles = loadStyles;
+    return less;
+};
 },{"../less":27,"./cache":3,"./error-reporting":4,"./file-manager":5,"./log-listener":7}],7:[function(require,module,exports){
 module.exports = function(less, options) {
 
@@ -8855,69 +9087,39 @@ module.exports = Visitor;
 // shim for using process in browser
 
 var process = module.exports = {};
+var queue = [];
+var draining = false;
 
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canMutationObserver = typeof window !== 'undefined'
-    && window.MutationObserver;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
+function drainQueue() {
+    if (draining) {
+        return;
     }
-
-    var queue = [];
-
-    if (canMutationObserver) {
-        var hiddenDiv = document.createElement("div");
-        var observer = new MutationObserver(function () {
-            var queueList = queue.slice();
-            queue.length = 0;
-            queueList.forEach(function (fn) {
-                fn();
-            });
-        });
-
-        observer.observe(hiddenDiv, { attributes: true });
-
-        return function nextTick(fn) {
-            if (!queue.length) {
-                hiddenDiv.setAttribute('yes', 'no');
-            }
-            queue.push(fn);
-        };
+    draining = true;
+    var currentQueue;
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        var i = -1;
+        while (++i < len) {
+            currentQueue[i]();
+        }
+        len = queue.length;
     }
-
-    if (canPost) {
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
+    draining = false;
+}
+process.nextTick = function (fun) {
+    queue.push(fun);
+    if (!draining) {
+        setTimeout(drainQueue, 0);
     }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
+};
 
 process.title = 'browser';
 process.browser = true;
 process.env = {};
 process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
 
 function noop() {}
 
@@ -8938,6 +9140,7 @@ process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
+process.umask = function() { return 0; };
 
 },{}],87:[function(require,module,exports){
 'use strict';
