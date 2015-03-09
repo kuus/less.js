@@ -7416,72 +7416,72 @@ function errorConsole(e, rootHref) {
     log(content, logLevel.errors);
 }
 
-function createCSS(styles, sheet, lastModified) {
-    // Strip the query-string
-    var href = sheet.href || '';
+// function createCSS(styles, sheet, lastModified) { // k6custom comment block
+//     // Strip the query-string
+//     var href = sheet.href || '';
 
-    // If there is no title set, use the filename, minus the extension
-    var id = 'less:' + (sheet.title || extractId(href));
+//     // If there is no title set, use the filename, minus the extension
+//     var id = 'less:' + (sheet.title || extractId(href));
 
-    // If this has already been inserted into the DOM, we may need to replace it
-    var oldCss = document.getElementById(id);
-    var keepOldCss = false;
+//     // If this has already been inserted into the DOM, we may need to replace it
+//     var oldCss = document.getElementById(id);
+//     var keepOldCss = false;
 
-    // Create a new stylesheet node for insertion or (if necessary) replacement
-    var css = document.createElement('style');
-    css.setAttribute('type', 'text/css');
-    if (sheet.media) {
-        css.setAttribute('media', sheet.media);
-    }
-    css.id = id;
+//     // Create a new stylesheet node for insertion or (if necessary) replacement
+//     var css = document.createElement('style');
+//     css.setAttribute('type', 'text/css');
+//     if (sheet.media) {
+//         css.setAttribute('media', sheet.media);
+//     }
+//     css.id = id;
 
-    if (!css.styleSheet) {
-        css.appendChild(document.createTextNode(styles));
+//     if (!css.styleSheet) {
+//         css.appendChild(document.createTextNode(styles));
 
-        // If new contents match contents of oldCss, don't replace oldCss
-        keepOldCss = (oldCss !== null && oldCss.childNodes.length > 0 && css.childNodes.length > 0 &&
-            oldCss.firstChild.nodeValue === css.firstChild.nodeValue);
-    }
+//         // If new contents match contents of oldCss, don't replace oldCss
+//         keepOldCss = (oldCss !== null && oldCss.childNodes.length > 0 && css.childNodes.length > 0 &&
+//             oldCss.firstChild.nodeValue === css.firstChild.nodeValue);
+//     }
 
-    var head = document.getElementsByTagName('head')[0];
+//     var head = document.getElementsByTagName('head')[0];
 
-    // If there is no oldCss, just append; otherwise, only append if we need
-    // to replace oldCss with an updated stylesheet
-    if (oldCss === null || keepOldCss === false) {
-        var nextEl = sheet && sheet.nextSibling || null;
-        if (nextEl) {
-            nextEl.parentNode.insertBefore(css, nextEl);
-        } else {
-            head.appendChild(css);
-        }
-    }
-    if (oldCss && keepOldCss === false) {
-        oldCss.parentNode.removeChild(oldCss);
-    }
+//     // If there is no oldCss, just append; otherwise, only append if we need
+//     // to replace oldCss with an updated stylesheet
+//     if (oldCss === null || keepOldCss === false) {
+//         var nextEl = sheet && sheet.nextSibling || null;
+//         if (nextEl) {
+//             nextEl.parentNode.insertBefore(css, nextEl);
+//         } else {
+//             head.appendChild(css);
+//         }
+//     }
+//     if (oldCss && keepOldCss === false) {
+//         oldCss.parentNode.removeChild(oldCss);
+//     }
 
-    // For IE.
-    // This needs to happen *after* the style element is added to the DOM, otherwise IE 7 and 8 may crash.
-    // See http://social.msdn.microsoft.com/Forums/en-US/7e081b65-878a-4c22-8e68-c10d39c2ed32/internet-explorer-crashes-appending-style-element-to-head
-    if (css.styleSheet) {
-        try {
-            css.styleSheet.cssText = styles;
-        } catch (e) {
-            throw new(Error)("Couldn't reassign styleSheet.cssText.");
-        }
-    }
+//     // For IE.
+//     // This needs to happen *after* the style element is added to the DOM, otherwise IE 7 and 8 may crash.
+//     // See http://social.msdn.microsoft.com/Forums/en-US/7e081b65-878a-4c22-8e68-c10d39c2ed32/internet-explorer-crashes-appending-style-element-to-head
+//     if (css.styleSheet) {
+//         try {
+//             css.styleSheet.cssText = styles;
+//         } catch (e) {
+//             throw new(Error)("Couldn't reassign styleSheet.cssText.");
+//         }
+//     }
 
-    // Don't update the local store if the file wasn't modified
-    if (lastModified && cache) {
-        log('saving ' + href + ' to cache.', logLevel.info);
-        try {
-            cache.setItem(href, styles);
-            cache.setItem(href + ':timestamp', lastModified);
-        } catch(e) {
-            //TODO - could do with adding more robust error handling
-            log('failed to save', logLevel.errors);
-        }
-    }
-}
+//     // Don't update the local store if the file wasn't modified
+//     if (lastModified && cache) {
+//         log('saving ' + href + ' to cache.', logLevel.info);
+//         try {
+//             cache.setItem(href, styles);
+//             cache.setItem(href + ':timestamp', lastModified);
+//         } catch(e) {
+//             //TODO - could do with adding more robust error handling
+//             log('failed to save', logLevel.errors);
+//         }
+//     }
+// }
 
 function postProcessCSS(styles) {
     if (less.postProcessor && typeof less.postProcessor === 'function') {
@@ -7490,169 +7490,169 @@ function postProcessCSS(styles) {
     return styles;
 }
 
-function errorHTML(e, rootHref) {
-    var id = 'less-error-message:' + extractId(rootHref || "");
-    var template = '<li><label>{line}</label><pre class="{class}">{content}</pre></li>';
-    var elem = document.createElement('div'), timer, content, errors = [];
-    var filename = e.filename || rootHref;
-    var filenameNoPath = filename.match(/([^\/]+(\?.*)?)$/)[1];
+// function errorHTML(e, rootHref) { // k6custom comment block
+//     var id = 'less-error-message:' + extractId(rootHref || "");
+//     var template = '<li><label>{line}</label><pre class="{class}">{content}</pre></li>';
+//     var elem = document.createElement('div'), timer, content, errors = [];
+//     var filename = e.filename || rootHref;
+//     var filenameNoPath = filename.match(/([^\/]+(\?.*)?)$/)[1];
 
-    elem.id        = id;
-    elem.className = "less-error-message";
+//     elem.id        = id;
+//     elem.className = "less-error-message";
 
-    content = '<h3>'  + (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
-        '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + "</a> ";
+//     content = '<h3>'  + (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
+//         '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + "</a> ";
 
-    var errorline = function (e, i, classname) {
-        if (e.extract[i] !== undefined) {
-            errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
-                .replace(/\{class\}/, classname)
-                .replace(/\{content\}/, e.extract[i]));
-        }
-    };
+//     var errorline = function (e, i, classname) {
+//         if (e.extract[i] !== undefined) {
+//             errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
+//                 .replace(/\{class\}/, classname)
+//                 .replace(/\{content\}/, e.extract[i]));
+//         }
+//     };
 
-    if (e.extract) {
-        errorline(e, 0, '');
-        errorline(e, 1, 'line');
-        errorline(e, 2, '');
-        content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':</p>' +
-            '<ul>' + errors.join('') + '</ul>';
-    } else if (e.stack) {
-        content += '<br/>' + e.stack.split('\n').slice(1).join('<br/>');
-    }
-    elem.innerHTML = content;
+//     if (e.extract) {
+//         errorline(e, 0, '');
+//         errorline(e, 1, 'line');
+//         errorline(e, 2, '');
+//         content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':</p>' +
+//             '<ul>' + errors.join('') + '</ul>';
+//     } else if (e.stack) {
+//         content += '<br/>' + e.stack.split('\n').slice(1).join('<br/>');
+//     }
+//     elem.innerHTML = content;
 
-    // CSS for error messages
-    createCSS([
-        '.less-error-message ul, .less-error-message li {',
-        'list-style-type: none;',
-        'margin-right: 15px;',
-        'padding: 4px 0;',
-        'margin: 0;',
-        '}',
-        '.less-error-message label {',
-        'font-size: 12px;',
-        'margin-right: 15px;',
-        'padding: 4px 0;',
-        'color: #cc7777;',
-        '}',
-        '.less-error-message pre {',
-        'color: #dd6666;',
-        'padding: 4px 0;',
-        'margin: 0;',
-        'display: inline-block;',
-        '}',
-        '.less-error-message pre.line {',
-        'color: #ff0000;',
-        '}',
-        '.less-error-message h3 {',
-        'font-size: 20px;',
-        'font-weight: bold;',
-        'padding: 15px 0 5px 0;',
-        'margin: 0;',
-        '}',
-        '.less-error-message a {',
-        'color: #10a',
-        '}',
-        '.less-error-message .error {',
-        'color: red;',
-        'font-weight: bold;',
-        'padding-bottom: 2px;',
-        'border-bottom: 1px dashed red;',
-        '}'
-    ].join('\n'), { title: 'error-message' });
+//     // CSS for error messages
+//     createCSS([
+//         '.less-error-message ul, .less-error-message li {',
+//         'list-style-type: none;',
+//         'margin-right: 15px;',
+//         'padding: 4px 0;',
+//         'margin: 0;',
+//         '}',
+//         '.less-error-message label {',
+//         'font-size: 12px;',
+//         'margin-right: 15px;',
+//         'padding: 4px 0;',
+//         'color: #cc7777;',
+//         '}',
+//         '.less-error-message pre {',
+//         'color: #dd6666;',
+//         'padding: 4px 0;',
+//         'margin: 0;',
+//         'display: inline-block;',
+//         '}',
+//         '.less-error-message pre.line {',
+//         'color: #ff0000;',
+//         '}',
+//         '.less-error-message h3 {',
+//         'font-size: 20px;',
+//         'font-weight: bold;',
+//         'padding: 15px 0 5px 0;',
+//         'margin: 0;',
+//         '}',
+//         '.less-error-message a {',
+//         'color: #10a',
+//         '}',
+//         '.less-error-message .error {',
+//         'color: red;',
+//         'font-weight: bold;',
+//         'padding-bottom: 2px;',
+//         'border-bottom: 1px dashed red;',
+//         '}'
+//     ].join('\n'), { title: 'error-message' });
 
-    elem.style.cssText = [
-        "font-family: Arial, sans-serif",
-        "border: 1px solid #e00",
-        "background-color: #eee",
-        "border-radius: 5px",
-        "-webkit-border-radius: 5px",
-        "-moz-border-radius: 5px",
-        "color: #e00",
-        "padding: 15px",
-        "margin-bottom: 15px"
-    ].join(';');
+//     elem.style.cssText = [
+//         "font-family: Arial, sans-serif",
+//         "border: 1px solid #e00",
+//         "background-color: #eee",
+//         "border-radius: 5px",
+//         "-webkit-border-radius: 5px",
+//         "-moz-border-radius: 5px",
+//         "color: #e00",
+//         "padding: 15px",
+//         "margin-bottom: 15px"
+//     ].join(';');
 
-    if (less.env == 'development') {
-        timer = setInterval(function () {
-            if (document.body) {
-                if (document.getElementById(id)) {
-                    document.body.replaceChild(elem, document.getElementById(id));
-                } else {
-                    document.body.insertBefore(elem, document.body.firstChild);
-                }
-                clearInterval(timer);
-            }
-        }, 10);
-    }
-}
+//     if (less.env == 'development') {
+//         timer = setInterval(function () {
+//             if (document.body) {
+//                 if (document.getElementById(id)) {
+//                     document.body.replaceChild(elem, document.getElementById(id));
+//                 } else {
+//                     document.body.insertBefore(elem, document.body.firstChild);
+//                 }
+//                 clearInterval(timer);
+//             }
+//         }, 10);
+//     }
+// }
 
 function error(e, rootHref) {
-    if (!less.errorReporting || less.errorReporting === "html") {
+    /*if (!less.errorReporting || less.errorReporting === "html") { // k6custom comment block
         errorHTML(e, rootHref);
-    } else if (less.errorReporting === "console") {
+    } else */if (less.errorReporting === "console") {
         errorConsole(e, rootHref);
     } else if (typeof less.errorReporting === 'function') {
         less.errorReporting("add", e, rootHref);
     }
 }
 
-function removeErrorHTML(path) {
-    var node = document.getElementById('less-error-message:' + extractId(path));
-    if (node) {
-        node.parentNode.removeChild(node);
-    }
-}
+// function removeErrorHTML(path) { // k6custom comment block
+//     var node = document.getElementById('less-error-message:' + extractId(path));
+//     if (node) {
+//         node.parentNode.removeChild(node);
+//     }
+// }
 
 function removeErrorConsole(path) {
     //no action
 }
 
 function removeError(path) {
-    if (!less.errorReporting || less.errorReporting === "html") {
+    /*if (!less.errorReporting || less.errorReporting === "html") { // k6custom comment block
         removeErrorHTML(path);
-    } else if (less.errorReporting === "console") {
+    } else*/ if (less.errorReporting === "console") {
         removeErrorConsole(path);
     } else if (typeof less.errorReporting === 'function') {
         less.errorReporting("remove", path);
     }
 }
 
-function loadStyles(modifyVars) {
-    var styles = document.getElementsByTagName('style'),
-        style;
-    for (var i = 0; i < styles.length; i++) {
-        style = styles[i];
-        if (style.type.match(typePattern)) {
-            var env = new less.tree.parseEnv(less),
-                lessText = style.innerHTML || '';
-            env.filename = document.location.href.replace(/#.*$/, '');
+// function loadStyles(modifyVars) { // k6custom comment block
+//     var styles = document.getElementsByTagName('style'),
+//         style;
+//     for (var i = 0; i < styles.length; i++) {
+//         style = styles[i];
+//         if (style.type.match(typePattern)) {
+//             var env = new less.tree.parseEnv(less),
+//                 lessText = style.innerHTML || '';
+//             env.filename = document.location.href.replace(/#.*$/, '');
 
-            if (modifyVars || less.globalVars) {
-                env.useFileCache = true;
-            }
+//             if (modifyVars || less.globalVars) {
+//                 env.useFileCache = true;
+//             }
 
-            /*jshint loopfunc:true */
-            // use closure to store current value of i
-            var callback = (function(style) {
-                return function (e, cssAST) {
-                    if (e) {
-                        return error(e, "inline");
-                    }
-                    var css = cssAST.toCSS(less);
-                    style.type = 'text/css';
-                    if (style.styleSheet) {
-                        style.styleSheet.cssText = css;
-                    } else {
-                        style.innerHTML = css;
-                    }
-                };
-            })(style);
-            new(less.Parser)(env).parse(lessText, callback, {globalVars: less.globalVars, modifyVars: modifyVars});
-        }
-    }
-}
+//             /*jshint loopfunc:true */
+//             // use closure to store current value of i
+//             var callback = (function(style) {
+//                 return function (e, cssAST) {
+//                     if (e) {
+//                         return error(e, "inline");
+//                     }
+//                     var css = cssAST.toCSS(less);
+//                     style.type = 'text/css';
+//                     if (style.styleSheet) {
+//                         style.styleSheet.cssText = css;
+//                     } else {
+//                         style.innerHTML = css;
+//                     }
+//                 };
+//             })(style);
+//             new(less.Parser)(env).parse(lessText, callback, {globalVars: less.globalVars, modifyVars: modifyVars});
+//         }
+//     }
+// }
 
 function extractUrlParts(url, baseUrl) {
     // urlParts[1] = protocol&hostname || /
@@ -7733,7 +7733,7 @@ function pathDiff(url, baseUrl) {
 }
 
 function getXMLHttpRequest() {
-    if (XMLHttpRequest) { // k6
+    if (XMLHttpRequest) { // k6custom
         return new XMLHttpRequest();
     } else {
         try {
@@ -7753,8 +7753,7 @@ function doXHR(url, type, callback, errback) {
     // Undebuggable bug.. This breaks in firefox webworker, see
     // @link( https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#Properties),
     // search for 'Not available to workers'.
-    //
-    // if (typeof xhr.overrideMimeType === 'function') {
+    // if (typeof xhr.overrideMimeType === 'function') { // k6custom
     //     xhr.overrideMimeType('text/css');
     // }
     log("XHR: Getting '" + url + "'", logLevel.debug);
@@ -7796,7 +7795,7 @@ function loadFile(originalHref, currentFileInfo, callback, env, modifyVars) {
 
     // sheet may be set to the stylesheet for the initial load or a collection of properties including
     // some env variables for imports
-    var hrefParts = extractUrlParts(originalHref, options.locationHref); // k6 was: window.location.href);
+    var hrefParts = extractUrlParts(originalHref, options.locationHref); // k6custom was: window.location.href);
     var href      = hrefParts.url;
     var newFileInfo = {
         currentDirectory: hrefParts.path,
@@ -7848,111 +7847,111 @@ function loadFile(originalHref, currentFileInfo, callback, env, modifyVars) {
     });
 }
 
-function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
+// function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) { // k6custom comment block
 
-    var env = new less.tree.parseEnv(less);
-    env.mime = sheet.type;
+//     var env = new less.tree.parseEnv(less);
+//     env.mime = sheet.type;
 
-    if (modifyVars || less.globalVars) {
-        env.useFileCache = true;
-    }
+//     if (modifyVars || less.globalVars) {
+//         env.useFileCache = true;
+//     }
 
-    loadFile(sheet.href, null, function(e, data, path, newFileInfo, webInfo) {
+//     loadFile(sheet.href, null, function(e, data, path, newFileInfo, webInfo) {
 
-        if (webInfo) {
-            webInfo.remaining = remaining;
+//         if (webInfo) {
+//             webInfo.remaining = remaining;
 
-            var css       = cache && cache.getItem(path),
-                timestamp = cache && cache.getItem(path + ':timestamp');
+//             var css       = cache && cache.getItem(path),
+//                 timestamp = cache && cache.getItem(path + ':timestamp');
 
-            if (!reload && timestamp && webInfo.lastModified &&
-                (new(Date)(webInfo.lastModified).valueOf() ===
-                    new(Date)(timestamp).valueOf())) {
-                // Use local copy
-                createCSS(css, sheet);
-                webInfo.local = true;
-                callback(null, null, data, sheet, webInfo, path);
-                return;
-            }
-        }
+//             if (!reload && timestamp && webInfo.lastModified &&
+//                 (new(Date)(webInfo.lastModified).valueOf() ===
+//                     new(Date)(timestamp).valueOf())) {
+//                 // Use local copy
+//                 createCSS(css, sheet);
+//                 webInfo.local = true;
+//                 callback(null, null, data, sheet, webInfo, path);
+//                 return;
+//             }
+//         }
 
-        //TODO add tests around how this behaves when reloading
-        removeError(path);
+//         //TODO add tests around how this behaves when reloading
+//         removeError(path);
 
-        if (data) {
-            env.currentFileInfo = newFileInfo;
-            new(less.Parser)(env).parse(data, function (e, root) {
-                if (e) { return callback(e, null, null, sheet); }
-                try {
-                    callback(e, root, data, sheet, webInfo, path);
-                } catch (e) {
-                    callback(e, null, null, sheet);
-                }
-            }, {modifyVars: modifyVars, globalVars: less.globalVars});
-        } else {
-            callback(e, null, null, sheet, webInfo, path);
-        }
-    }, env, modifyVars);
-}
+//         if (data) {
+//             env.currentFileInfo = newFileInfo;
+//             new(less.Parser)(env).parse(data, function (e, root) {
+//                 if (e) { return callback(e, null, null, sheet); }
+//                 try {
+//                     callback(e, root, data, sheet, webInfo, path);
+//                 } catch (e) {
+//                     callback(e, null, null, sheet);
+//                 }
+//             }, {modifyVars: modifyVars, globalVars: less.globalVars});
+//         } else {
+//             callback(e, null, null, sheet, webInfo, path);
+//         }
+//     }, env, modifyVars);
+// }
 
-function loadStyleSheets(callback, reload, modifyVars) {
-    for (var i = 0; i < less.sheets.length; i++) {
-        loadStyleSheet(less.sheets[i], callback, reload, less.sheets.length - (i + 1), modifyVars);
-    }
-}
+// function loadStyleSheets(callback, reload, modifyVars) { // k6custom comment block
+//     for (var i = 0; i < less.sheets.length; i++) {
+//         loadStyleSheet(less.sheets[i], callback, reload, less.sheets.length - (i + 1), modifyVars);
+//     }
+// }
 
-function initRunningMode(){
-    if (less.env === 'development') {
-        less.optimization = 0;
-        less.watchTimer = setInterval(function () {
-            if (less.watchMode) {
-                loadStyleSheets(function (e, root, _, sheet, env) {
-                    if (e) {
-                        error(e, sheet.href);
-                    } else if (root) {
-                        var styles = root.toCSS(less);
-                        styles = postProcessCSS(styles);
-                        createCSS(styles, sheet, env.lastModified);
-                    }
-                });
-            }
-        }, less.poll);
-    } else {
-        less.optimization = 3;
-    }
-}
+// function initRunningMode(){ // k6custom comment block
+//     if (less.env === 'development') {
+//         less.optimization = 0;
+//         less.watchTimer = setInterval(function () {
+//             if (less.watchMode) {
+//                 loadStyleSheets(function (e, root, _, sheet, env) {
+//                     if (e) {
+//                         error(e, sheet.href);
+//                     } else if (root) {
+//                         var styles = root.toCSS(less);
+//                         styles = postProcessCSS(styles);
+//                         createCSS(styles, sheet, env.lastModified);
+//                     }
+//                 });
+//             }
+//         }, less.poll);
+//     } else {
+//         less.optimization = 3;
+//     }
+// }
 
 
 
 //
 // Watch mode
 //
-less.watch   = function () {
-    if (!less.watchMode ){
-        less.env = 'development';
-         initRunningMode();
-    }
-    this.watchMode = true;
-    return true;
-};
+// less.watch   = function () { // k6custom comment block
+//     if (!less.watchMode ){
+//         less.env = 'development';
+//          initRunningMode();
+//     }
+//     this.watchMode = true;
+//     return true;
+// };
 
-less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = false; return false; };
+// less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = false; return false; }; // k6custom comment block
 
-  // if (/!watch/.test(location.hash)) { // k6 comment block
+  // if (/!watch/.test(location.hash)) { // k6custom comment block
   //     less.watch();
   // }
 
   // if (less.env != 'development') {
   //     try {
-  //         // cache = (typeof(window.localStorage) === 'undefined') ? null : window.localStorage; // k6
-  //         cache = (typeof localStorage === 'undefined') ? null : localStorage; // k6
+  //         // cache = (typeof(window.localStorage) === 'undefined') ? null : window.localStorage; // k6custom
+  //         cache = (typeof localStorage === 'undefined') ? null : localStorage; // k6custom
   //     } catch (_) {}
   // }
 
 //
 // Get all <link> tags with the 'rel' attribute set to "stylesheet/less"
 //
-  // var links = document.getElementsByTagName('link'); // k6 comment block
+  // var links = document.getElementsByTagName('link'); // k6custom comment block
 
   // less.sheets = [];
 
@@ -7967,41 +7966,41 @@ less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = fal
 // With this function, it's possible to alter variables and re-render
 // CSS without reloading less-files
 //
-less.modifyVars = function(record) {
-    less.refresh(false, record);
-};
+// less.modifyVars = function(record) { // k6custom comment block
+//     less.refresh(false, record);
+// };
 
-less.refresh = function (reload, modifyVars) {
-    var startTime, endTime;
-    startTime = endTime = new Date();
+// less.refresh = function (reload, modifyVars) { // k6custom comment block
+//     var startTime, endTime;
+//     startTime = endTime = new Date();
 
-    loadStyleSheets(function (e, root, _, sheet, env) {
-        if (e) {
-            return error(e, sheet.href);
-        }
-        if (env.local) {
-            log("loading " + sheet.href + " from cache.", logLevel.info);
-        } else {
-            log("parsed " + sheet.href + " successfully.", logLevel.debug);
-            var styles = root.toCSS(less);
-            styles = postProcessCSS(styles);
-            createCSS(styles, sheet, env.lastModified);
-        }
-        log("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms', logLevel.info);
-        if (env.remaining === 0) {
-            log("less has finished. css generated in " + (new Date() - startTime) + 'ms', logLevel.info);
-        }
-        endTime = new Date();
-    }, reload, modifyVars);
+//     loadStyleSheets(function (e, root, _, sheet, env) {
+//         if (e) {
+//             return error(e, sheet.href);
+//         }
+//         if (env.local) {
+//             log("loading " + sheet.href + " from cache.", logLevel.info);
+//         } else {
+//             log("parsed " + sheet.href + " successfully.", logLevel.debug);
+//             var styles = root.toCSS(less);
+//             styles = postProcessCSS(styles);
+//             createCSS(styles, sheet, env.lastModified);
+//         }
+//         log("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms', logLevel.info);
+//         if (env.remaining === 0) {
+//             log("less has finished. css generated in " + (new Date() - startTime) + 'ms', logLevel.info);
+//         }
+//         endTime = new Date();
+//     }, reload, modifyVars);
 
-    loadStyles(modifyVars);
-};
+//     loadStyles(modifyVars);
+// };
 
-less.refreshStyles = loadStyles;
+// less.refreshStyles = loadStyles;
 
 less.Parser.fileLoader = loadFile;
 
-// less.refresh(less.env === 'development'); // k6
+// less.refresh(less.env === 'development'); // k6custom
 
 // amd.js
 //
