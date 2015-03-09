@@ -47,7 +47,7 @@ module.exports = function(options) {
     }
 
     if (options.onReady === undefined) {
-        options.onReady = true;
+        options.onReady = false; // worker-custom
     }
 
 };
