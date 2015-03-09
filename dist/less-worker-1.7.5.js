@@ -7320,15 +7320,15 @@ tree.Variable.prototype = {
 //
 /*global less, window, document, XMLHttpRequest, location */
 
-var isFileProtocol = /^(file|chrome(-extension)?|resource|qrc|app):/.test(location.protocol);
+var isFileProtocol = false; //^(file|chrome(-extension)?|resource|qrc|app):/.test(location.protocol); // k6custom
 
-less.env = less.env || (location.hostname == '127.0.0.1' ||
+less.env = less.env || /*(location.hostname == '127.0.0.1' ||
                         location.hostname == '0.0.0.0'   ||
                         location.hostname == 'localhost' ||
                         (location.port &&
                           location.port.length > 0)      ||
                         isFileProtocol                   ? 'development'
-                                                         : 'production');
+                                                         : */'production'; // k6custom
 
 var logLevel = {
     debug: 3,
@@ -7355,7 +7355,7 @@ less.async = less.async || false;
 less.fileAsync = less.fileAsync || false;
 
 // Interval between watch polls
-less.poll = less.poll || (isFileProtocol ? 1000 : 1500);
+// less.poll = less.poll || (isFileProtocol ? 1000 : 1500); // k6custom
 
 //Setup user functions
 if (less.functions) {
@@ -7366,7 +7366,7 @@ if (less.functions) {
    }
 }
 
-var dumpLineNumbers = /!dumpLineNumbers:(comments|mediaquery|all)/.exec(location.hash);
+var dumpLineNumbers = false; // /!dumpLineNumbers:(comments|mediaquery|all)/.exec(location.hash); // k6custom
 if (dumpLineNumbers) {
     less.dumpLineNumbers = dumpLineNumbers[1];
 }
