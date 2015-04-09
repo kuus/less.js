@@ -1,3 +1,38 @@
+# 2.5.0
+
+2015-04-03
+
+ - supports the scoped `@plugin` directive to load function plugins
+ - All directives are bubbled (e.g. supports), not just media
+ - Performance improvements to the parser - should help non-chrome browsers with very large less files to be alot quicker.
+ - the image size function respects include paths like other file functions
+ - colour functions take a relative argument that applies percentages relatively instead of absolutely
+ - include paths now allows : as a separator on windows (recognising and not splitting drive names by the backslash)
+ - `@import (css)` does not pull the directive above comments
+ - Fix for import statements without quotes sometimes causing issues
+ - replace supports dimensions and colours
+ - the browser field is set in the package.json for use with browserify
+ - another fix to support paths being passed as a string instead of an array
+ - detached rulesets can be used as default arguments
+ - Fix alot of false warnings about extends
+ - errors written to stderr more consistently
+ - consistently keep units if strict units is off
+ - Better support for comments in function all arguments
+
+# 2.4.0
+
+2015-02-07
+
+ - Support for plugins that pre-process (to add libraries silently etc.)
+ - Empty sourcemaps now work
+ - Extract and Length functions now ignore comments in a list (more work to come to fix the general problem)
+ - fragment url's are treated absolute since they refer to the html document
+ - Extends on a selector joined with `&` now work better
+ - Nested mixins work better with !important (regression in 2.3.0)
+ - The promise dependency is now actually optional (introduced in 2.0.0)
+ - Files with just `\r` newlines now process ok (regression in 2.0.0)
+ - When strict units is off and the unit is 1/x, (e.g. 1 / 12px) the unit output is x, previously nothing (regression in 2.0.0)
+
 # 2.3.1
 
 2015-01-28
